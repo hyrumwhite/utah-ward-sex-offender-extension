@@ -5,7 +5,6 @@ const offenderFinder = {
 
     getOffenderList : async () => {
         const offenders = await app.getOffenders();
-        console.log(offenders);
 
         return offenderFinder.getMemberElements().filter(member => {
             const name = member.textContent.toLowerCase();
