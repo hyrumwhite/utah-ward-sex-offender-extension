@@ -1,5 +1,7 @@
 # utah-ward-sex-offender-extension
 
+Join our Discord: https://discord.gg/grwHJyU
+
 # Installation
 1. clone the repo
 2. On Chrome, navigate to chrome://extensions/
