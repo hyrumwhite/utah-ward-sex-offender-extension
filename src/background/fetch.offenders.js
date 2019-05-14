@@ -1,9 +1,10 @@
-import chrome from "../lib/chrome.js";
+import app from "../lib/app.js";
 import parser from "../lib/crimewatch.parse.js";
 
-chrome.runtime.onMessage.addListener(async (message, sender, reply) => {
-    await chrome.setCookie(parser.cookie());
-    const params = await chrome.getData();
+app.respondOffenders(async (reply) => {
+    const params = await app.getData();
+    
+    await app.setCookie(parser.cookie());
 
     const offenders = await parser.getData({
         AddrCity   : params.city,

@@ -1,10 +1,11 @@
-import getOffenders from "../lib/get.offenders.js";
+import app from "../lib/app.js";
 
 const offenderFinder = {
     getMemberElements : () => [...document.querySelectorAll(`[class*="ListingEntry__HouseholdEntry"]`)],
 
     getOffenderList : async () => {
-        const offenders = await getOffenders();
+        const offenders = await app.getOffenders();
+        console.log(offenders);
 
         return offenderFinder.getMemberElements().filter(member => {
             const name = member.textContent.toLowerCase();

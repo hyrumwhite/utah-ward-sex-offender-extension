@@ -1,7 +1,7 @@
 const asyncChromeWrapper = {
     setCookie : (cookies) => 
         new Promise(res => {
-            chrome.cookies.set(cookie, (data) => {
+            chrome.cookies.set(cookies, (data) => {
                 res(data)
             });
         }),
@@ -12,6 +12,18 @@ const asyncChromeWrapper = {
     setData : (data) =>
         new Promise(res => {
             chrome.storage.sync.set(data, () => res());
+        }),
+    getOffenders : () =>
+        new Promise(res => {
+            chrome.runtime.sendMessage({ message : "get.offenders" }, (offenders) => {
+                res(offenders);
+            });
+        }),
+    respondOffenders : (func) =>
+        chrome.runtime.onMessage.addListener((message, sender, reply) => {
+            func(reply);
+
+            return true;
         })
 };
 

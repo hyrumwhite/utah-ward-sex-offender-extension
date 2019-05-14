@@ -1,10 +1,10 @@
 import debounce from "../lib/debounce.js";
-import chrome from "../lib/chrome.js";
+import app from "../lib/app.js";
 
 async function loadStoredData() {
-    const data = await chrome.getData();
+    const data = await app.getData();
 
-    Object.entries(items).forEach(([ key, value ]) => {
+    Object.entries(data).forEach(([ key, value ]) => {
         const element = document.getElementById(key);
 
         element.value = value;
@@ -15,7 +15,7 @@ window.onload = () => {
     loadStoredData();
     
     const save = debounce(({ target }) => {
-        chrome.setData({ [target.id]: target.value });
+        app.setData({ [target.id]: target.value });
     }, 400);
     
     document.querySelectorAll("input, select").forEach(input => {
