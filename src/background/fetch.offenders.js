@@ -15,6 +15,4 @@ app.respondOffenders(async (reply) => {
     });
 
     reply(offenders);
-
-    return true;
 });
