@@ -20,3 +20,6 @@
 1. As long as the code works and isn't just downright terrible, I don't care too much.
 2. We should try and make this extension integrate as semalessly as possible with the existing lds.org site. Let's try to avoid forcing the users to have to refresh to get back to normal functionality. You can see this reflected in how we're just setting elements to 'display: none' when we filter out the non-offenders.
 3. That's about it. 
+
+# Help Out
+Check out our [Discord](https://discord.gg/Aa5MPdz)
