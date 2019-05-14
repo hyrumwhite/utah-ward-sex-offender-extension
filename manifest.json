@@ -1,24 +1,24 @@
 {
   "manifest_version": 2,
-  "name": "LDS Sex Offender Directory",
+  "name": "utah-ward-sex-offender-extension",
   "description": "Adds a 'Sex Offender' section to the lds.org directory",
-  "version": "0.1",
+  "version": "0.0.1",
   "icons": {
     "16": "icons/icon.png",
     "48": "icons/icon.png",
     "128": "icons/icon.png"
   },
   "browser_action": {
-    "default_popup": "popup/popup.html"
+    "default_popup": "./extension/menu/menu.html"
   },
   "background": {
-    "scripts": ["main.js"]
+    "scripts": [ "./extension/dist/fetch.offenders.js" ]
   },
   "content_scripts": [
     {
-      "matches": ["*://directory.lds.org/*"],
+      "matches": [ "*://directory.lds.org/*" ],
       "run_at": "document_idle",
-      "js": ["src/offender-finder.js"]
+      "js": [ "./extension/dist/offender.finder.js" ]
     }
   ],
   "permissions": [
