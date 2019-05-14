@@ -2,6 +2,14 @@ let unitno;
 let navContainerId = 'wardOrStakeUnitNav';
 let listContainerId = 'middleScrollerColumn';
 
+const c =  {
+  WARD_DIRECTORY_MAP: "Ward Directory and Map",
+
+  // selectors
+  DIRECTORY_TITLE_SELECTOR: "title.next-head",
+  DIRECTORY_LIST_SELECTOR: `[class*="directory__TypeFilter"]`,
+};
+
 const renderOffenderList = list => {
   let ul = document.createElement('ul');
   ul.className = 'list';
@@ -152,6 +160,9 @@ function initializeDialog() {
 }
 
 function insertOffenderOption(categoryDiv) {
+  if (categoryDiv === null) {
+    return;
+  }
   let offenderToggle = document.createElement('span');
   offenderToggle.id = 'offenders-toggle';
   offenderToggle.textContent = 'Show sex offenders';
@@ -163,17 +174,35 @@ function insertOffenderOption(categoryDiv) {
   offenderToggle.addEventListener('click', offendersFilter);
   categoryDiv.appendChild(offenderToggle);
 }
-// var interval = window.setInterval(() => {
-//   let element = document.querySelector(`[class*="directory__TypeFilter"]`);
-//   if (element) {
-//     insertDialog();
-//     insertOffenderOption(element);
-//     window.clearInterval(interval);
-//   }
-// }, 500);
+
+var findDirectoryList = () => {
+  return document.querySelector(c.DIRECTORY_LIST_SELECTOR);
+};
+
+// addListenerToTitle adds a listener to the title element of the page. We only want to
+// insert the offender button if we have the ward directory list avaliable
+var addListenerToTitle = () => {
+  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+  let titleElement = document.querySelector(c.DIRECTORY_TITLE_SELECTOR);
+  if (titleElement == null) {
+    return;
+  }
+  var observer = new MutationObserver(function(mutations, observer) {
+      debugger;
+      console.log(mutations, observer);
+      // don't run insert if on a page like "Organizations | Ward Directory and Map"
+      if(mutations[0].addedNodes[0].data === c.WARD_DIRECTORY_MAP) {
+        insertOffenderOption(findDirectoryList())
+      }
+  });
+  observer.observe(titleElement, {childList:true});
+}
+
 window.setTimeout(() => {
   initializeDialog();
-  let element = document.querySelector(`[class*="directory__TypeFilter"]`);
-  insertOffenderOption(element);
+  // add change listener to title element
+  addListenerToTitle();
+  // Ensure insert has a chance to run once at the beginning 
+  insertOffenderOption(findDirectoryList())
 }, 5000);
 console.log('ASSDFA ASDF');
