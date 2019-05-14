@@ -17,16 +17,6 @@ const crimewatch = {
         storeId        : '0',
         value          : 'NTQ0Mzg%3D'
     }),
-    /**
-     *         
-     * 
-     *  let { city, streetAddress, state, zipcode, searchRadius } = items;
-        city = city.replace(' ', '+');
-        streetAddress = streetAddress.replace(' ', '+');
-        state = state.replace(' ', '+');
-        let urlPrefix = `http://www.icrimewatch.net/results.php?AgencyID=54438&whichaddr=home_addr%7Ctemp_addr&SubmitAddrSearch=1`;
-        let url = `${urlPrefix}&AddrStreet=${streetAddress}&AddrCity=${city}&AddrState=${state}&AddrZip=${zipcode}&AddrZipPlus=&excludeIncarcerated=&radius=${searchRadius}`;
-     */
 
     get : (params = {}) =>
         `${crimewatch.url}results.php?${
