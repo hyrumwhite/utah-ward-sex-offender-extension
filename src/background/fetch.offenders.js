@@ -1,56 +1,19 @@
-import tomorrow from "../lib/tomorrow";
-import urlSerialize from "../lib/url.serialize";
+import chrome from "../lib/chrome.js";
+import parser from "../lib/crimewatch.parse.js";
 
-const urlPrefix = `http://www.icrimewatch.net/results.php?AgencyID=54438&whichaddr=home_addr%7Ctemp_addr&SubmitAddrSearch=1`;
+chrome.runtime.onMessage.addListener(async (message, sender, reply) => {
+    await chrome.setCookie(parser.cookie());
+    const params = await chrome.getData();
 
-chrome.runtime.onMessage.addListener((message, sender, reply) => {
-  chrome.cookies.set(
-    {
-      url            : 'http://www.icrimewatch.net/',
-      domain         : '.icrimewatch.net',
-      expirationDate : tomorrow,
-      httpOnly       : false,
-      name           : 'accepted_license',
-      path           : '/',
-      sameSite       : 'no_restriction',
-      secure         : false,
-      storeId        : '0',
-      value          : 'NTQ0Mzg%3D'
-    },
-    async () => {
-      chrome.storage.sync.get(null, async (items) => {
-        const { city, streetAddress, state, zipcode, searchRadius } = items;
+    const offenders = await parser.getData({
+        AddrCity   : params.city,
+        AddrStreet : params.streetAddress,
+        AddrState  : params.state,
+        AddrZip    : params.zipcode,
+        radius     : params.searchRadius
+    });
 
-        // this is gross, but a bit more clear than what was happening before
-        const url = `${urlPrefix}&${urlSerialize({
-          AddrStreet : streetAddress,
-          AddrCity   : city,
-          AddrState  : state,
-          AddrZip    : zipcode,
-          radius     : searchRadius,
+    reply(offenders);
 
-          // url flags
-          AddrZipPlus         : null,
-          excludeIncarcerated : null
-        })}`;
-
-        // TODO test and get working
-        const response = await fetch(url);
-
-        console.log(response.responseText);
-        let offenderTableIndex = this.responseText.search(
-          /<table.*bgcolor="#CCCCCC"/g
-        );
-        let offenderTableEndIndex =
-          this.responseText.indexOf('</table>', offenderTableIndex) +
-          '</table>'.length;
-        let offenderTableString = this.responseText.slice(
-          offenderTableIndex,
-          offenderTableEndIndex
-        );
-        reply(offenderTableString);
-      });
-    }
-  );
-  return true;
+    return true;
 });

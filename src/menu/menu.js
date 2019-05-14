@@ -1,28 +1,24 @@
 import debounce from "../lib/debounce.js";
+import chrome from "../lib/chrome.js";
 
-// reload data into page
-chrome.storage.sync.get(null, items => {
-  for (let key in items) {
-    const element = document.getElementById(key);
+async function loadStoredData() {
+    const data = await chrome.getData();
 
-    if (!element) {
-      return;
-    }
+    Object.entries(items).forEach(([ key, value ]) => {
+        const element = document.getElementById(key);
 
-    element.value = items[key];
-  }
-});
+        element.value = value;
+    });
+}
 
-// save values when updated
-const save = debounce(({ target }) => {
-  const id = target.id;
-  const value = target.value;
-
-  chrome.storage.sync.set({ [id] : value }, () => {
-    console.log(`"${id}" is set to "${value}"`);
-  });
-}, 400);
-
-document.querySelectorAll("input, select").forEach(input => {
-  input.addEventListener("input", save);
-});
+window.onload = () => {
+    loadStoredData();
+    
+    const save = debounce(({ target }) => {
+        chrome.setData({ [target.id]: target.value });
+    }, 400);
+    
+    document.querySelectorAll("input, select").forEach(input => {
+        input.addEventListener("input", save);
+    });
+};

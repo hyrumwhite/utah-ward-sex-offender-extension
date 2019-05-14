@@ -6,7 +6,8 @@
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "build:release": "npm run build -- --mode=production",
-    "start": "npm run build -- --watch"
+    "start": "npm run build -- --watch",
+    "server": "node ./build/dev/index.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   },
   "homepage": "https://github.com/hyrumwhite/utah-ward-sex-offender-extension#readme",
   "devDependencies": {
+    "express": "^4.16.4",
     "webpack": "^4.31.0",
     "webpack-cli": "^3.3.2"
   }
