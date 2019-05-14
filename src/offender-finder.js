@@ -11,16 +11,17 @@ const renderOffenderList = list => {
 };
 async function getOffenderList(memberElements) {
   chrome.storage.sync.get(null, items => {
-    let listContainer = document.querySelector(`#${listContainerId}`);
     if (!items.zipcode) {
       // return (listContainer.innerHTML =
       //   '<span style="margin:.5rem; position: relative; top:.5rem;">Missing required location information. Please click the extension icon on your browser, enter your info, and click the "Sex Offenders" option again.</span>');
     }
     // listContainer.innerHTML =
     //   '<span style="margin:.5rem; position: relative; top:.5rem;">Loading Offenders...</span>';
-    console.log('LOADING');
+
+    dialog.querySelector('#extension-dialog-body').textContent =
+      'Loading offenders. This may take several seconds.';
     chrome.runtime.sendMessage({ greeting: 'hello' }, async function(response) {
-      console.log('LOADED');
+      dialog.close();
       let offenderTable = response;
       let div = document.createElement('div');
       div.innerHTML = offenderTable;
@@ -79,9 +80,75 @@ function hideOffenders() {
   toggle.textContent = 'Show sex offenders';
 }
 
+let dialog;
 function offendersFilter() {
   showingOffenders = !showingOffenders;
-  showingOffenders ? showOffenders() : hideOffenders();
+  if (showingOffenders) {
+    dialog.style.opacity = 1;
+    dialog.showModal();
+  } else {
+    dialog.close();
+    hideOffenders();
+  }
+}
+function initializeDialog() {
+  dialog && (dialog.innerHTML = '');
+  dialog = dialog || document.createElement('dialog');
+  dialog.id = 'extension-dialog';
+  dialog.style.cssText = `
+    opacity: 0;
+    display:flex;
+    flex-direction: column;
+    background: white;
+    border-radius: .25rem;
+    padding: .5rem;
+    position: fixed;
+    top: 30%;
+    border: 1px solid #e0e0e0;
+    max-width: 60vw;
+    width: 60vw;
+    transition: .3s;
+    border: none;
+  `;
+  let header = document.createElement('h2');
+  header.textContent = 'Disclaimer';
+  header.style.cssText = `
+    border-bottom: 1px solid #e0e0e0;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-bottom: .5rem;
+  `;
+  dialog.appendChild(header);
+  let body = document.createElement('div');
+  body.id = 'extension-dialog-body';
+  body.style.marginTop = '.5rem';
+  body.style.marginBottom = '.5rem';
+  body.textContent =
+    'This filter is best guess only. No one in this list is guaranteed to be a sex offender. Please independently verify. Do not use this information to harass or attack the registered sex offenders. It is for informational use and awareness only.';
+  dialog.appendChild(body);
+  let buttonRow = document.createElement('div');
+  buttonRow.style.cssText = `
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-top: .5rem;
+    border-top: 1px solid #e0e0e0;
+  `;
+  let okButton = document.createElement('button');
+  okButton.style.cssText = `
+    background: rgb(23, 124, 156);
+    padding: .5rem;
+    border-radius: 3px;
+    border: none;
+    color: white;
+    cursor: pointer;
+  `;
+  okButton.addEventListener('click', showOffenders);
+  okButton.textContent = 'Ok';
+  buttonRow.appendChild(okButton);
+  dialog.appendChild(buttonRow);
+  dialog.addEventListener('close', () => (dialog.style.opacity = 0));
+  document.body.appendChild(dialog);
 }
 
 function insertOffenderOption(categoryDiv) {
@@ -96,11 +163,17 @@ function insertOffenderOption(categoryDiv) {
   offenderToggle.addEventListener('click', offendersFilter);
   categoryDiv.appendChild(offenderToggle);
 }
-var interval = window.setInterval(() => {
+// var interval = window.setInterval(() => {
+//   let element = document.querySelector(`[class*="directory__TypeFilter"]`);
+//   if (element) {
+//     insertDialog();
+//     insertOffenderOption(element);
+//     window.clearInterval(interval);
+//   }
+// }, 500);
+window.setTimeout(() => {
+  initializeDialog();
   let element = document.querySelector(`[class*="directory__TypeFilter"]`);
-  if (element) {
-    insertOffenderOption(element);
-    window.clearInterval(interval);
-  }
-}, 500);
-console.log('CHANGE DETECTED');
+  insertOffenderOption(element);
+}, 5000);
+console.log('ASSDFA ASDF');
