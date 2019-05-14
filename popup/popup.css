@@ -1,0 +1,50 @@
+html,
+body {
+  margin: 0rem;
+  width: 400px;
+}
+.header {
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+  padding-left: 0.5rem;
+  opacity: 0.82;
+  padding-top: 0.125rem;
+}
+.instructions {
+  padding: 0.5rem;
+  padding-bottom: 0rem;
+}
+.details {
+  padding: 0.5rem;
+  display: flex;
+}
+.left-column {
+  margin-right: 1.5rem;
+}
+select {
+  display: block;
+  border-radius: 0.25rem;
+  border: 1px solid #e0e0e0;
+  width: 7rem;
+}
+input {
+  border-radius: 0.25rem;
+  border: 1px solid #e0e0e0;
+}
+input,
+select {
+  padding: 0.25rem;
+  outline: none;
+}
+
+label {
+  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 1rem;
+}
+label > div,
+label > label {
+  margin-left: 0.25rem;
+}
