@@ -1,208 +1,55 @@
-let unitno;
-let navContainerId = 'wardOrStakeUnitNav';
-let listContainerId = 'middleScrollerColumn';
+let card = document.createElement('div');
+card.style.cssText = `
+          background: white;
+          box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12);
+          border-radius: 3px;
+          position: fixed;
+          right: 1rem;
+          bottom: -5rem;
+          z-index: 999999;
+          display: flex;
+          align-items: center;
+          transition: .3s;
+          padding: 1.5rem;
+        `;
+card.textContent = 'Updated Ward Sex Offender Extension data.';
+document.body.appendChild(card);
 
-const c =  {
-  WARD_DIRECTORY_MAP: "Ward Directory and Map",
-
-  // selectors
-  DIRECTORY_TITLE_SELECTOR: "title.next-head",
-  DIRECTORY_LIST_SELECTOR: `[class*="directory__TypeFilter"]`,
+const getUnitNumber = () => {
+  let path = window.location.pathname.slice(1);
+  let [unitNumber] = path.split('/');
+  return unitNumber;
 };
-
-const renderOffenderList = list => {
-  let ul = document.createElement('ul');
-  ul.className = 'list';
-  for (let item of list) {
-    console.log(item);
-  }
-};
-async function getOffenderList(memberElements) {
-  chrome.storage.sync.get(null, items => {
-    if (!items.zipcode) {
-      // return (listContainer.innerHTML =
-      //   '<span style="margin:.5rem; position: relative; top:.5rem;">Missing required location information. Please click the extension icon on your browser, enter your info, and click the "Sex Offenders" option again.</span>');
+let unitNumber = getUnitNumber();
+if (!unitNumber) {
+  let intervalId = window.setInterval(() => {
+    unitNumber = getUnitNumber();
+    if (unitNumber) {
+      window.clearInterval(intervalId);
+      getWardMembers();
     }
-    // listContainer.innerHTML =
-    //   '<span style="margin:.5rem; position: relative; top:.5rem;">Loading Offenders...</span>';
-
-    dialog.querySelector('#extension-dialog-body').textContent =
-      'Loading offenders. This may take several seconds.';
-    chrome.runtime.sendMessage({ greeting: 'hello' }, async function(response) {
-      dialog.close();
-      let offenderTable = response;
-      let div = document.createElement('div');
-      div.innerHTML = offenderTable;
-      let offenders = [];
-      let cells = div.querySelectorAll('tbody td:nth-child(5)');
-      let imageCells = div.querySelectorAll('tbody td:nth-child(2)');
-      for (let [index, cell] of cells.entries()) {
-        let image = imageCells[index].querySelector('img');
-        offenders.push({
-          name: cell.textContent.toLowerCase().trim(),
-          imageUrl: image ? image.src : ''
-        });
-      }
-      let offendersList = offenders;
-      let parsedOffenders = [];
-      for (let { name, imageUrl } of offendersList) {
-        let [firstName, lastName] = name.split(' ');
-        parsedOffenders.push({ firstName, lastName, imageUrl });
-      }
-      let letters = document.querySelectorAll('[class*="Listing__Header"]');
-      letters.forEach(letter => (letter.style.display = 'none'));
-      for (let element of memberElements) {
-        let hasMatch = false;
-        for (let { firstName, lastName, imageUrl } of parsedOffenders) {
-          let memberNames = element.textContent.toLowerCase();
-          hasMatch =
-            memberNames.includes(firstName) && memberNames.includes(lastName);
-          if (hasMatch) {
-            console.log({ memberNames, firstName, lastName });
-            break;
-          }
-        }
-        console.log({ hasMatch });
-        if (!hasMatch) {
-          element.parentElement.style.display = 'none';
-        }
-      }
-      console.log('LOADED');
+  }, 100);
+}
+let imageUrl = '/api/v4/photos/households/${houseHoldUuid}?thumbnail=true';
+const getWardMembers = async () => {
+  chrome.storage.local.set({ unitNumber }, function() {
+    console.log('set unit number');
+  });
+  try {
+    let response = await fetch(`/api/v4/households?unit=${unitNumber}`, {
+      credentials: 'include'
     });
-  });
-}
-
-let showingOffenders = false;
-
-function showOffenders() {
-  let toggle = document.querySelector('#offenders-toggle');
-  toggle.textContent = 'Remove offender filter';
-  let wardMemberElements = document.querySelectorAll(
-    '[class*="ListingEntry__HouseholdEntry"]'
-  );
-  getOffenderList(wardMemberElements);
-}
-
-function hideOffenders() {
-  let toggle = document.querySelector('#offenders-toggle');
-  toggle.textContent = 'Show sex offenders';
-}
-
-let dialog;
-function offendersFilter() {
-  showingOffenders = !showingOffenders;
-  if (showingOffenders) {
-    dialog.style.opacity = 1;
-    dialog.showModal();
-  } else {
-    dialog.close();
-    hideOffenders();
+    if (response.ok) {
+      let members = await response.json();
+      chrome.storage.local.set({ members }, () => {
+        card.style.bottom = '1rem';
+        window.setTimeout(() => (card.style.bottom = '-5rem'), 3000);
+      });
+    }
+  } catch (e) {
+    console.log(e);
   }
-}
-function initializeDialog() {
-  dialog && (dialog.innerHTML = '');
-  dialog = dialog || document.createElement('dialog');
-  dialog.id = 'extension-dialog';
-  dialog.style.cssText = `
-    opacity: 0;
-    display:flex;
-    flex-direction: column;
-    background: white;
-    border-radius: .25rem;
-    padding: .5rem;
-    position: fixed;
-    top: 30%;
-    border: 1px solid #e0e0e0;
-    max-width: 60vw;
-    width: 60vw;
-    transition: .3s;
-    border: none;
-  `;
-  let header = document.createElement('h2');
-  header.textContent = 'Disclaimer';
-  header.style.cssText = `
-    border-bottom: 1px solid #e0e0e0;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    padding-bottom: .5rem;
-  `;
-  dialog.appendChild(header);
-  let body = document.createElement('div');
-  body.id = 'extension-dialog-body';
-  body.style.marginTop = '.5rem';
-  body.style.marginBottom = '.5rem';
-  body.textContent =
-    'This filter is best guess only. No one in this list is guaranteed to be a sex offender. Please independently verify. Do not use this information to harass or attack the registered sex offenders. It is for informational use and awareness only.';
-  dialog.appendChild(body);
-  let buttonRow = document.createElement('div');
-  buttonRow.style.cssText = `
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-top: .5rem;
-    border-top: 1px solid #e0e0e0;
-  `;
-  let okButton = document.createElement('button');
-  okButton.style.cssText = `
-    background: rgb(23, 124, 156);
-    padding: .5rem;
-    border-radius: 3px;
-    border: none;
-    color: white;
-    cursor: pointer;
-  `;
-  okButton.addEventListener('click', showOffenders);
-  okButton.textContent = 'Ok';
-  buttonRow.appendChild(okButton);
-  dialog.appendChild(buttonRow);
-  dialog.addEventListener('close', () => (dialog.style.opacity = 0));
-  document.body.appendChild(dialog);
-}
-
-function insertOffenderOption(categoryDiv) {
-  if (categoryDiv === null) {
-    return;
-  }
-  let offenderToggle = document.createElement('span');
-  offenderToggle.id = 'offenders-toggle';
-  offenderToggle.textContent = 'Show sex offenders';
-  offenderToggle.style.cssText = `
-    color: rgb(1, 182, 209);
-    cursor: pointer;
-    float: right;
-  `;
-  offenderToggle.addEventListener('click', offendersFilter);
-  categoryDiv.appendChild(offenderToggle);
-}
-
-var findDirectoryList = () => {
-  return document.querySelector(c.DIRECTORY_LIST_SELECTOR);
 };
-
-// addListenerToTitle adds a listener to the title element of the page. We only want to
-// insert the offender button if we have the ward directory list avaliable
-var addListenerToTitle = () => {
-  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-  let titleElement = document.querySelector(c.DIRECTORY_TITLE_SELECTOR);
-  if (titleElement == null) {
-    return;
-  }
-  var observer = new MutationObserver(function(mutations, observer) {
-      debugger;
-      console.log(mutations, observer);
-      // don't run insert if on a page like "Organizations | Ward Directory and Map"
-      if(mutations[0].addedNodes[0].data === c.WARD_DIRECTORY_MAP) {
-        insertOffenderOption(findDirectoryList())
-      }
-  });
-  observer.observe(titleElement, {childList:true});
+if (!isNaN(parseInt(unitNumber))) {
+  getWardMembers();
 }
-
-window.setTimeout(() => {
-  initializeDialog();
-  // add change listener to title element
-  addListenerToTitle();
-  // Ensure insert has a chance to run once at the beginning 
-  insertOffenderOption(findDirectoryList())
-}, 5000);
-console.log('ASSDFA ASDF');

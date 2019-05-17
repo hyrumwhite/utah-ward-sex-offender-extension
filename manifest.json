@@ -1,12 +1,13 @@
 {
   "manifest_version": 2,
-  "name": "LDS Sex Offender Directory",
-  "description": "Adds a 'Sex Offender' section to the lds.org directory",
-  "version": "0.1",
+  "name": "Ward Sex Offender Finder",
+  "description": "Matches local members of The Church of Jesus Christ of Latter Day Saints to results from nsopw.gov.",
+  "version": "0.2",
   "icons": {
-    "16": "icons/icon.png",
-    "48": "icons/icon.png",
-    "128": "icons/icon.png"
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   },
   "browser_action": {
     "default_popup": "popup/popup.html"
@@ -19,15 +20,20 @@
       "matches": ["*://directory.lds.org/*"],
       "run_at": "document_idle",
       "js": ["src/offender-finder.js"]
+    },
+    {
+      "matches": ["*://www.nsopw.gov/en/search/results/*"],
+      "run_at": "document_idle",
+      "js": ["src/nspow-filter.js"]
     }
   ],
   "permissions": [
     "activeTab",
     "tabs",
     "cookies",
-    "*://*.icrimewatch.net/",
-    "storage"
+    "storage",
+    "unlimitedStorage"
   ],
   "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
-  "web_accessible_resources": ["src/*", "icons/*", "popup/*", "options/*"]
+  "web_accessible_resources": ["src/*", "icons/*", "popup/*"]
 }
